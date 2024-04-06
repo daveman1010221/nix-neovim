@@ -6,8 +6,6 @@ vim.g.did_load_plugins_plugin = true
 -- many plugins annoyingly require a call to a 'setup' function to be loaded,
 -- even with default configs
 
-require('lspconfig').pyright.setup({})
-
 require('nvim-tree').setup({
    sort_by = "case_sensitive",
    view = {
@@ -49,5 +47,7 @@ require('gruvbox').setup({
 require("neoconf").setup({
   -- override any of the default settings here
 })
+
+require('lspconfig').pyright.setup({})
 
 require('which-key').setup()
