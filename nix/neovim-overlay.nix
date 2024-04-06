@@ -44,6 +44,7 @@ with final.pkgs.lib; let
   extraPackages = with pkgs; [
     # language servers, etc.
     lua-language-server
+    tree-sitter
     nil # nix LSP
   ];
 in {
