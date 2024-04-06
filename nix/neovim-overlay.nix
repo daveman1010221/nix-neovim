@@ -29,6 +29,7 @@ with final.pkgs.lib; let
     intero-neovim
     markdown-preview-nvim
     neoconf-nvim
+    neodev-nvim
     nvim-lspconfig
     nvim-tree-lua
     nvim-treesitter.withAllGrammars
