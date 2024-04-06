@@ -51,5 +51,4 @@ require('nvim-treesitter.configs').setup({
   indent = { enable = true },
 })
 
-require('nvim-surround').setup()
 require('which-key').setup()
