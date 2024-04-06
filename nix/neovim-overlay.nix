@@ -37,7 +37,6 @@ with final.pkgs.lib; let
     nvim-web-devicons
     vim-tmux
     which-key-nvim
-    lualine-nvim
   ];
 
   extraPackages = with pkgs; [
