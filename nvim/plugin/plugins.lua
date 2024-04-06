@@ -44,4 +44,8 @@ require('gruvbox').setup({
   transparent_mode = false,
 })
 
+require("neoconf").setup({
+  -- override any of the default settings here
+})
+
 require('which-key').setup()
