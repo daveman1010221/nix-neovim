@@ -5,7 +5,7 @@ vim.opt.compatible = false
 
 -- Enable true colour support
 if fn.has('termguicolors') then
-  opt.termguicolors = true
+  vim.opt.termguicolors = true
 end
 
 -- See :h <option> to see what the options do
