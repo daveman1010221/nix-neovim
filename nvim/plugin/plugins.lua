@@ -44,11 +44,4 @@ require('gruvbox').setup({
   transparent_mode = false,
 })
 
-require('nvim-treesitter.configs').setup({
-  ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "elixir", "heex", "javascript", "html", "css", "meson", "python", "rust", "toml", "csv" },
-  sync_install = false,
-  highlight = { enable = true },
-  indent = { enable = true },
-})
-
 require('which-key').setup()
