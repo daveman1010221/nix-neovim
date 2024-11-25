@@ -32,6 +32,7 @@ with final.pkgs.lib; let
     neoconf-nvim
     neodev-nvim
     nvim-lspconfig
+    nvim-navic
     nvim-tree-lua
     nvim-treesitter.withAllGrammars
     nvim-treesitter-context
