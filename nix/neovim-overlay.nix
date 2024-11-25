@@ -31,6 +31,7 @@ with final.pkgs.lib; let
     markdown-preview-nvim
     neoconf-nvim
     neodev-nvim
+    nvim-cmp
     nvim-lspconfig
     nvim-navic
     nvim-tree-lua
