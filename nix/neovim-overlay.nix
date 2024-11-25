@@ -23,6 +23,7 @@ with final.pkgs.lib; let
   # }
   all-plugins = with pkgs.vimPlugins; [
     # plugins from nixpkgs go in here.
+    cmp-nvim-lsp
     ctrlp-vim
     vim-fugitive
     gruvbox-nvim
