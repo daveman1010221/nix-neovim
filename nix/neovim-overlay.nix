@@ -25,6 +25,7 @@ with final.pkgs.lib; let
     # plugins from nixpkgs go in here.
     cmp-nvim-lsp
     ctrlp-vim
+    dhall-vim
     vim-fugitive
     gruvbox-nvim
     intero-neovim
@@ -37,6 +38,7 @@ with final.pkgs.lib; let
     nvim-tree-lua
     nvim-treesitter.withAllGrammars
     nvim-treesitter-context
+    nvim-treesitter-parsers.dhall
     nvim-treesitter-textobjects
     nvim-ts-context-commentstring
     nvim-web-devicons
