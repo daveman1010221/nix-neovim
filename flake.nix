@@ -4,7 +4,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    gen-luarc.url = "github:mrcjkb/nix-gen-luarc-json";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    nixpkgs-lib.url = "github:NixOS/nixpkgs/eb9ceca17df2ea50a250b6b27f7bf6ab0186f198";
+    gen-luarc = {
+      url = "github:mrcjkb/nix-gen-luarc-json";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
