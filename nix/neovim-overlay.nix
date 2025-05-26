@@ -31,7 +31,7 @@ with final.pkgs.lib; let
     intero-neovim
     markdown-preview-nvim
     neoconf-nvim
-    neodev-nvim
+    lazydev-nvim
     nvim-cmp
     nvim-lspconfig
     nvim-navic
@@ -42,6 +42,7 @@ with final.pkgs.lib; let
     nvim-treesitter-textobjects
     nvim-ts-context-commentstring
     nvim-web-devicons
+    rustaceanvim
     vim-tmux
     which-key-nvim
   ];

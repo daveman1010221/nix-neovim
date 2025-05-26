@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs-lib.url = "github:NixOS/nixpkgs/eb9ceca17df2ea50a250b6b27f7bf6ab0186f198";
+    nixpkgs-lib.url = "github:NixOS/nixpkgs";
     gen-luarc = {
       url = "github:mrcjkb/nix-gen-luarc-json";
       inputs.flake-parts.follows = "flake-parts";
