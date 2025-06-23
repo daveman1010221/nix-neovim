@@ -9,7 +9,6 @@
     gen-luarc = {
       url = "github:mrcjkb/nix-gen-luarc-json";
       inputs.flake-parts.follows = "flake-parts";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
