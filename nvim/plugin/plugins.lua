@@ -48,6 +48,4 @@ require("neoconf").setup({
   -- override any of the default settings here
 })
 
-require('lspconfig').pyright.setup({})
-
 require('which-key').setup()
