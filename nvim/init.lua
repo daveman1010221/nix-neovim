@@ -80,16 +80,6 @@ local function diag_prefix(icon, diagnostic)
   return string.format("%s %s", icon, diagnostic.message)
 end
 
-local function define_sign(name, text)
-  fn.sign_define(name, { texthl = name, text = text, numhl = "" })
-end
-
--- Requires Nerd Fonts
-define_sign("DiagnosticSignError", "󰅚")
-define_sign("DiagnosticSignWarn",  "⚠")
-define_sign("DiagnosticSignInfo",  "ⓘ")
-define_sign("DiagnosticSignHint",  "󰌶")
-
 vim.diagnostic.config({
   virtual_text = {
     prefix = "",
@@ -107,7 +97,22 @@ vim.diagnostic.config({
       return diag_prefix("■", diagnostic)
     end,
   },
-  signs = true,
+  -- Neovim 0.11+: define diagnostic sign text here (sign_define() is deprecated)
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "󰅚",
+      [vim.diagnostic.severity.WARN]  = "⚠",
+      [vim.diagnostic.severity.INFO]  = "ⓘ",
+      [vim.diagnostic.severity.HINT]  = "󰌶",
+    },
+    -- If you ever want number-column highlights for diagnostics:
+    -- numhl = {
+    --   [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+    --   [vim.diagnostic.severity.WARN]  = "DiagnosticSignWarn",
+    --   [vim.diagnostic.severity.INFO]  = "DiagnosticSignInfo",
+    --   [vim.diagnostic.severity.HINT]  = "DiagnosticSignHint",
+    -- },
+  },
   update_in_insert = false,
   underline = true,
   severity_sort = true,
