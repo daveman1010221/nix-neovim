@@ -3,7 +3,19 @@ if vim.g.did_load_treesitter_plugin then
 end
 vim.g.did_load_treesitter_plugin = true
 
-local configs = require('nvim-treesitter.configs')
+-- Treesitter must be on runtimepath; if packaging is broken, don't hard-crash startup.
+local ok, configs = pcall(require, "nvim-treesitter.configs")
+if not ok then
+  vim.notify(
+    "nvim-treesitter is missing from runtimepath; skipping treesitter setup",
+    vim.log.levels.WARN
+  )
+  return
+end
+
+require("nvim-treesitter.install").prefer_git = false
+require("nvim-treesitter.install").compilers = {}
+
 vim.g.skip_ts_context_comment_string_module = true
 
 ---@diagnostic disable-next-line: missing-fields
@@ -86,11 +98,29 @@ configs.setup {
   },
 }
 
-require('treesitter-context').setup {
-  max_lines = 3,
-}
+do
+  local ok_ctx, ctx = pcall(require, "treesitter-context")
+  if ok_ctx then
+    ctx.setup {
+      max_lines = 3,
+    }
+  else
+    vim.notify("treesitter-context missing; skipping", vim.log.levels.WARN)
+  end
+end
 
-require('ts_context_commentstring').setup()
+do
+  local ok_cs, cs = pcall(require, "ts_context_commentstring")
+  if ok_cs then
+    cs.setup()
+  else
+    vim.notify("ts_context_commentstring missing; skipping", vim.log.levels.WARN)
+  end
+end
+
+pcall(function()
+  vim.treesitter.language.register("json", "jsonc")
+end)
 
 -- Tree-sitter based folding
 -- vim.opt.foldmethod = 'expr'

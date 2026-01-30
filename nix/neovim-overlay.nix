@@ -10,6 +10,21 @@ with final.pkgs.lib; let
       version = src.lastModifiedDate;
     };
 
+  # Work around nixpkgs treesitter packaging/runtimepath regressions by pinning
+  # upstream nvim-treesitter as a standard vim plugin derivation.
+  #
+  # NOTE: Replace the hash with the one Nix prints on the first build attempt.
+  nvim-treesitter-upstream = pkgs.vimUtils.buildVimPlugin {
+    pname = "nvim-treesitter";
+    version = "0.9.2";
+    src = pkgs.fetchFromGitHub {
+      owner = "nvim-treesitter";
+      repo = "nvim-treesitter";
+      rev = "v0.9.2";
+      hash = "sha256-zAyiitJIgOCZTB0CmgNt0MHENM70SOHLIoWrVwOJKFg=";
+    };
+  };
+
   # This is the helper function that builds the Neovim derivation.
   mkNeovim = pkgs.callPackage ./mkNeovim.nix {};
 
@@ -22,7 +37,6 @@ with final.pkgs.lib; let
   #   ...
   # }
   all-plugins = with pkgs.vimPlugins; [
-    # plugins from nixpkgs go in here.
     cmp-nvim-lsp
     ctrlp-vim
     dhall-vim
@@ -36,11 +50,31 @@ with final.pkgs.lib; let
     nvim-lspconfig
     nvim-navic
     nvim-tree-lua
-    nvim-treesitter.withAllGrammars
+  
+    # Treesitter core
+    nvim-treesitter-upstream
     nvim-treesitter-context
-    nvim-treesitter-parsers.dhall
     nvim-treesitter-textobjects
     nvim-ts-context-commentstring
+  
+    # Treesitter parsers (explicit, stable)
+    nvim-treesitter-parsers.bash
+    nvim-treesitter-parsers.c
+    nvim-treesitter-parsers.cpp
+    nvim-treesitter-parsers.dhall
+    nvim-treesitter-parsers.fish
+    nvim-treesitter-parsers.json
+    nvim-treesitter-parsers.json5
+    nvim-treesitter-parsers.lua
+    nvim-treesitter-parsers.markdown
+    nvim-treesitter-parsers.markdown_inline
+    nvim-treesitter-parsers.nix
+    nvim-treesitter-parsers.python
+    nvim-treesitter-parsers.regex
+    nvim-treesitter-parsers.rust
+    nvim-treesitter-parsers.toml
+    nvim-treesitter-parsers.yaml
+  
     nvim-web-devicons
     rustaceanvim
     vim-tmux
@@ -52,6 +86,14 @@ with final.pkgs.lib; let
     lua-language-server
     tree-sitter
     nil # nix LSP
+
+    # LSP servers for neoconf and python
+    nodePackages.vscode-langservers-extracted  # provides jsonls (and more)
+
+    # pyright packaging varies across nixpkgs revisions.
+    (if pkgs ? nodePackages && pkgs.nodePackages ? pyright
+     then pkgs.nodePackages.pyright
+     else pkgs.pyright)
   ];
 in {
   # This is the neovim derivation

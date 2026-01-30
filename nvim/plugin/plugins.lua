@@ -48,6 +48,21 @@ require("neoconf").setup({
   -- override any of the default settings here
 })
 
-require('lspconfig').pyright.setup({})
+-- Neovim 0.11+ LSP configuration (replaces deprecated lspconfig.setup() API)
+-- See :help lspconfig-nvim-0.11 and :help vim.lsp.config
+-- If nixpkgs provides only `pyright` (and not `pyright-langserver`),
+-- force the command so the config is usable.
+vim.lsp.config("pyright", {
+  cmd = (vim.fn.executable("pyright-langserver") == 1)
+    and { "pyright-langserver", "--stdio" }
+    or { "pyright", "--stdio" },
+})
+vim.lsp.enable("pyright")
+
+-- Lua
+vim.lsp.enable("lua_ls")
+
+-- JSON
+vim.lsp.enable("jsonls")
 
 require('which-key').setup()

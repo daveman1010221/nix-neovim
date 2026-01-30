@@ -103,7 +103,6 @@ with lib;
     # It also adds logic for bootstrapping dev plugins (for plugin developers)
     initLua =
       ''
-        vim.loader.enable()
         -- prepend lua directory
         vim.opt.rtp:prepend('${nvimRtp}/lua')
       ''
@@ -132,6 +131,7 @@ with lib;
       + ''
         vim.opt.rtp:append('${nvimRtp}/nvim')
         vim.opt.rtp:append('${nvimRtp}/after')
+        pcall(vim.loader.enable)
       '';
 
     # Add arguments to the Neovim wrapper script
