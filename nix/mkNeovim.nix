@@ -170,6 +170,7 @@ with lib;
     pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped (neovimConfig
       // {
         luaRcContent = initLua;
+        waylandSupport = false;
         wrapperArgs =
           escapeShellArgs neovimConfig.wrapperArgs
           + " "
