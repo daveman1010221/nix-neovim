@@ -10,21 +10,6 @@ with final.pkgs.lib; let
       version = src.lastModifiedDate;
     };
 
-  # Work around nixpkgs treesitter packaging/runtimepath regressions by pinning
-  # upstream nvim-treesitter as a standard vim plugin derivation.
-  #
-  # NOTE: Replace the hash with the one Nix prints on the first build attempt.
-  nvim-treesitter-upstream = pkgs.vimUtils.buildVimPlugin {
-    pname = "nvim-treesitter";
-    version = "0.9.2";
-    src = pkgs.fetchFromGitHub {
-      owner = "nvim-treesitter";
-      repo = "nvim-treesitter";
-      rev = "v0.9.2";
-      hash = "sha256-zAyiitJIgOCZTB0CmgNt0MHENM70SOHLIoWrVwOJKFg=";
-    };
-  };
-
   # This is the helper function that builds the Neovim derivation.
   mkNeovim = pkgs.callPackage ./mkNeovim.nix {};
 
@@ -52,7 +37,7 @@ with final.pkgs.lib; let
     nvim-tree-lua
   
     # Treesitter core
-    nvim-treesitter-upstream
+    nvim-treesitter
     nvim-treesitter-context
     nvim-treesitter-textobjects
     nvim-ts-context-commentstring
@@ -74,6 +59,7 @@ with final.pkgs.lib; let
     nvim-treesitter-parsers.rust
     nvim-treesitter-parsers.toml
     nvim-treesitter-parsers.yaml
+    nvim-treesitter-parsers.nu
   
     nvim-web-devicons
     rustaceanvim
@@ -86,6 +72,7 @@ with final.pkgs.lib; let
     lua-language-server
     tree-sitter
     nil # nix LSP
+    nushell
 
     # LSP servers for neoconf and python
     nodePackages.vscode-langservers-extracted  # provides jsonls (and more)
@@ -107,19 +94,4 @@ in {
   nvim-luarc-json = final.mk-luarc-json {
     plugins = all-plugins;
   };
-
-  # You can add as many derivations as you like.
-  # Use `ignoreConfigRegexes` to filter out config
-  # files you would not like to include.
-  #
-  # For example:
-  #
-  # nvim-pkg-no-telescope = mkNeovim {
-  #   plugins = [];
-  #   ignoreConfigRegexes = [
-  #     "^plugin/telescope.lua"
-  #     "^ftplugin/.*.lua"
-  #   ];
-  #   inherit extraPackages;
-  # };
 }

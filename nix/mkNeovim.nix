@@ -50,12 +50,35 @@ with lib;
       ))
     plugins;
 
-    # This nixpkgs util function creates an attrset
-    # that pkgs.wrapNeovimUnstable uses to configure the Neovim build.
-    neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
-      inherit extraPython3Packages withPython3 withRuby withNodeJs viAlias vimAlias;
-      plugins = normalizedPlugins;
-    };
+    # Build wrapper arguments manually
+    wrapperArgsList =
+      [
+        # Python3 support
+        (optionals withPython3 (
+          let
+            python = pkgs.python3;
+            sitePackages = map (p: p.${if lib.isDerivation p then "out" else "site-packages"}) (extraPython3Packages pkgs);
+          in [
+            "--set" "PYTHONPATH" (lib.makeSearchPath "lib/python${python.pythonVersion}/site-packages" sitePackages)
+            "--suffix" "PATH" ":" (lib.makeBinPath [ python ])
+          ]
+        ))
+        # External packages
+        (optionals (externalPackages != []) [
+          "--suffix" "PATH" ":" (lib.makeBinPath externalPackages)
+        ])
+        # SQLite
+        (optionals withSqlite [
+          "--set" "LIBSQLITE_CLIB_PATH" "${pkgs.sqlite.out}/lib/libsqlite3.so"
+          "--set" "LIBSQLITE" "${pkgs.sqlite.out}/lib/libsqlite3.so"
+        ])
+        # NVIM_APPNAME
+        (optionals (appName != "nvim" && appName != null && appName != "") [
+          "--set" "NVIM_APPNAME" appName
+        ])
+      ];
+    
+    wrapperArgs = lib.escapeShellArgs (builtins.concatLists wrapperArgsList);
 
     # This uses the ignoreConfigRegexes list to filter
     # the nvim directory
@@ -130,33 +153,15 @@ with lib;
       + ''
         vim.opt.rtp:append('${nvimRtp}/nvim')
         vim.opt.rtp:append('${nvimRtp}/after')
-        pcall(vim.loader.enable)
       '';
 
-    # Add arguments to the Neovim wrapper script
-    extraMakeWrapperArgs = builtins.concatStringsSep " " (
-      # Set the NVIM_APPNAME environment variable
-      (optional (appName != "nvim" && appName != null && appName != "")
-        ''--set NVIM_APPNAME "${appName}"'')
-      # Add external packages to the PATH
-      ++ (optional (externalPackages != [])
-        ''--prefix PATH : "${makeBinPath externalPackages}"'')
-      # Set the LIBSQLITE_CLIB_PATH if sqlite is enabled
-      ++ (optional withSqlite
-        ''--set LIBSQLITE_CLIB_PATH "${pkgs.sqlite.out}/lib/libsqlite3.so"'')
-      # Set the LIBSQLITE environment variable if sqlite is enabled
-      ++ (optional withSqlite
-        ''--set LIBSQLITE "${pkgs.sqlite.out}/lib/libsqlite3.so"'')
-    );
-
-    # Native Lua libraries
+    # Lua library paths (if any)
     extraMakeWrapperLuaCArgs = optionalString (resolvedExtraLuaPackages != []) ''
       --suffix LUA_CPATH ";" "${
         lib.concatMapStringsSep ";" pkgs.luaPackages.getLuaCPath
         resolvedExtraLuaPackages
       }"'';
 
-    # Lua libraries
     extraMakeWrapperLuaArgs =
       optionalString (resolvedExtraLuaPackages != [])
       ''
@@ -164,19 +169,15 @@ with lib;
           concatMapStringsSep ";" pkgs.luaPackages.getLuaPath
           resolvedExtraLuaPackages
         }"'';
+
+    # Combine wrapper args (including Lua paths) into the final string
+    finalWrapperArgs = wrapperArgs + " " + extraMakeWrapperLuaCArgs + " " + extraMakeWrapperLuaArgs;
   in
     # wrapNeovimUnstable is the nixpkgs utility function for building a Neovim derivation.
-    pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped (neovimConfig
-      // {
-        luaRcContent = initLua;
-        waylandSupport = false;
-        wrapperArgs =
-          escapeShellArgs neovimConfig.wrapperArgs
-          + " "
-          + extraMakeWrapperArgs
-          + " "
-          + extraMakeWrapperLuaCArgs
-          + " "
-          + extraMakeWrapperLuaArgs;
-        wrapRc = true;
-      })
+    pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped ({
+      plugins = normalizedPlugins;
+      wrapperArgs = finalWrapperArgs;
+      wrapRc = true;
+      luaRcContent = initLua;
+      waylandSupport = false;
+    } // (if viAlias then { viAlias = true; } else {}) // (if vimAlias then { vimAlias = true; } else {}))

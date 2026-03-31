@@ -3,39 +3,29 @@ if vim.g.did_load_treesitter_plugin then
 end
 vim.g.did_load_treesitter_plugin = true
 
--- Treesitter must be on runtimepath; if packaging is broken, don't hard-crash startup.
-local ok, configs = pcall(require, "nvim-treesitter.configs")
-if not ok then
-  vim.notify(
-    "nvim-treesitter is missing from runtimepath; skipping treesitter setup",
-    vim.log.levels.WARN
-  )
-  return
-end
+-- Treesitter-based folding
+vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 
-require("nvim-treesitter.install").prefer_git = false
-require("nvim-treesitter.install").compilers = {}
+-- Register json parser for jsonc
+pcall(function()
+  vim.treesitter.language.register("json", "jsonc")
+end)
 
-vim.g.skip_ts_context_comment_string_module = true
+-- Nu support
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "nu",
+  callback = function(args)
+    vim.schedule(function()
+      pcall(vim.treesitter.start, args.buf, "nu")
+    end)
+  end,
+})
 
----@diagnostic disable-next-line: missing-fields
-configs.setup {
-  -- ensure_installed = 'all',
-  -- auto_install = false, -- Do not automatically install missing parsers when entering buffer
-  highlight = {
-    enable = true,
-    disable = function(_, buf)
-      local max_filesize = 100 * 1024 -- 100 KiB
-      local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-      if ok and stats and stats.size > max_filesize then
-        return true
-      end
-    end,
-  },
-  textobjects = {
+local ok, textobjects = pcall(require, "nvim-treesitter-textobjects")
+if ok then
+  textobjects.setup({
     select = {
       enable = true,
-      -- Automatically jump forward to textobject, similar to targets.vim
       lookahead = true,
       keymaps = {
         ['af'] = '@function.outer',
@@ -54,9 +44,9 @@ configs.setup {
         ['iP'] = '@parameter.inner',
       },
       selection_modes = {
-        ['@parameter.outer'] = 'v', -- charwise
-        ['@function.outer'] = 'V', -- linewise
-        ['@class.outer'] = '<c-v>', -- blockwise
+        ['@parameter.outer'] = 'v',
+        ['@function.outer'] = 'V',
+        ['@class.outer'] = '<c-v>',
       },
     },
     swap = {
@@ -69,8 +59,7 @@ configs.setup {
       },
     },
     move = {
-      enable = true,
-      set_jumps = true, -- whether to set jumps in the jumplist
+      set_jumps = true,
       goto_next_start = {
         [']m'] = '@function.outer',
         [']P'] = '@parameter.outer',
@@ -88,40 +77,5 @@ configs.setup {
         ['[P'] = '@parameter.outer',
       },
     },
-    nsp_interop = {
-      enable = true,
-      peek_definition_code = {
-        ['df'] = '@function.outer',
-        ['dF'] = '@class.outer',
-      },
-    },
-  },
-}
-
-do
-  local ok_ctx, ctx = pcall(require, "treesitter-context")
-  if ok_ctx then
-    ctx.setup {
-      max_lines = 3,
-    }
-  else
-    vim.notify("treesitter-context missing; skipping", vim.log.levels.WARN)
-  end
+  })
 end
-
-do
-  local ok_cs, cs = pcall(require, "ts_context_commentstring")
-  if ok_cs then
-    cs.setup()
-  else
-    vim.notify("ts_context_commentstring missing; skipping", vim.log.levels.WARN)
-  end
-end
-
-pcall(function()
-  vim.treesitter.language.register("json", "jsonc")
-end)
-
--- Tree-sitter based folding
--- vim.opt.foldmethod = 'expr'
-vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
