@@ -75,12 +75,10 @@ with final.pkgs.lib; let
     nushell
 
     # LSP servers for neoconf and python
-    nodePackages.vscode-langservers-extracted  # provides jsonls (and more)
+    vscode-langservers-extracted  # provides jsonls (and more)
 
     # pyright packaging varies across nixpkgs revisions.
-    (if pkgs ? nodePackages && pkgs.nodePackages ? pyright
-     then pkgs.nodePackages.pyright
-     else pkgs.pyright)
+    pkgs.pyright
   ];
 in {
   # This is the neovim derivation
