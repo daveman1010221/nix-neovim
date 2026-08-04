@@ -107,22 +107,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     if not client then
       return
     end
-    local function buf_refresh_codeLens()
-      vim.schedule(function()
-        if client.server_capabilities.codeLensProvider then
-          vim.lsp.codelens.refresh()
-          return
-        end
-      end)
-    end
-    local group = api.nvim_create_augroup(string.format('lsp-%s-%s', bufnr, client.id), {})
     if client.server_capabilities.codeLensProvider then
-      vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufWritePost', 'TextChanged' }, {
-        group = group,
-        callback = buf_refresh_codeLens,
-        buffer = bufnr,
-      })
-      buf_refresh_codeLens()
+      vim.lsp.codelens.enable(true, { bufnr = bufnr })
     end
   end,
 })
