@@ -63,7 +63,6 @@ with final.pkgs.lib; let
   
     nvim-web-devicons
     rustaceanvim
-    vim-tmux
     which-key-nvim
   ];
 

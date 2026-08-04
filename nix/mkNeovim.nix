@@ -6,41 +6,27 @@
 }:
 with lib;
   {
-    appName ? null, # NVIM_APPNAME - Defaults to 'nvim'
-    plugins ? [], # List of plugins
-    # List of dev plugins (will be bootstrapped) - useful for plugin developers
-    # { name = <plugin-name>; url = <git-url>; }
-    devPlugins ? [],
-    # Regexes for config files to ignore, relative to the nvim directory.
-    # e.g. [ "^plugin/neogit.lua" "^ftplugin/.*.lua" ]
-    ignoreConfigRegexes ? [],
-    extraPackages ? [], # Extra runtime dependencies (e.g. ripgrep, ...)
-    # The below arguments can typically be left as their defaults
-    resolvedExtraLuaPackages ? [], # Additional lua packages (not plugins), e.g. from luarocks.org
-    extraPython3Packages ? p: [], # Additional python 3 packages
-    withPython3 ? true, # Build Neovim with Python 3 support?
-    withRuby ? false, # Build Neovim with Ruby support?
-    withNodeJs ? false, # Build Neovim with NodeJS support?
-    withSqlite ? true, # Add sqlite? This is a dependency for some plugins
-    # You probably don't want to create vi or vim aliases
-    # if the appName is something different than "nvim"
-    viAlias ? appName == "nvim", # Add a "vi" binary to the build output as an alias?
-    vimAlias ? appName == "nvim", # Add a "vim" binary to the build output as an alias?
+    appName ? null,                                 # NVIM_APPNAME - Defaults to 'nvim'
+    plugins ? [],                                   # List of plugins
+    devPlugins               ? [],
+    ignoreConfigRegexes      ? [],
+    extraPackages            ? [],                  # Extra runtime dependencies (e.g. ripgrep, ...)
+    resolvedExtraLuaPackages ? [],                  # Additional lua packages (not plugins), e.g. from luarocks.org
+    extraPython3Packages     ? p: [],               # Additional python 3 packages
+    withPython3              ? true,                # Build Neovim with Python 3 support?
+    withRuby                 ? false,               # Build Neovim with Ruby support?
+    withNodeJs               ? false,               # Build Neovim with NodeJS support?
+    withSqlite               ? true,                # Add sqlite? This is a dependency for some plugins
+    viAlias                  ? appName == "nvim",   # Add a "vi" binary to the build output as an alias?
+    vimAlias                 ? appName == "nvim",   # Add a "vim" binary to the build output as an alias?
   }: let
-    # This is the structure of a plugin definition.
-    # Each plugin in the `plugins` argument list can also be defined as this attrset
     defaultPlugin = {
-      plugin = null; # e.g. nvim-lspconfig
-      config = null; # plugin config
-      # If `optional` is set to `false`, the plugin is installed in the 'start' packpath
-      # set to `true`, it is installed in the 'opt' packpath, and can be lazy loaded with
-      # ':packadd! {plugin-name}
+      plugin = null;
+      config = null;
       optional = false;
     };
 
     externalPackages = extraPackages ++ (optionals withSqlite [pkgs.sqlite]);
-
-    # Map all plugins to an attrset { plugin = <plugin>; config = <config>; optional = <tf>; ... }
     normalizedPlugins = map (x:
       defaultPlugin
       // (
@@ -50,10 +36,8 @@ with lib;
       ))
     plugins;
 
-    # Build wrapper arguments manually
     wrapperArgsList =
       [
-        # Python3 support
         (optionals withPython3 (
           let
             python = pkgs.python3;
@@ -63,16 +47,16 @@ with lib;
             "--suffix" "PATH" ":" (lib.makeBinPath [ python ])
           ]
         ))
-        # External packages
+
         (optionals (externalPackages != []) [
           "--suffix" "PATH" ":" (lib.makeBinPath externalPackages)
         ])
-        # SQLite
+
         (optionals withSqlite [
           "--set" "LIBSQLITE_CLIB_PATH" "${pkgs.sqlite.out}/lib/libsqlite3.so"
           "--set" "LIBSQLITE" "${pkgs.sqlite.out}/lib/libsqlite3.so"
         ])
-        # NVIM_APPNAME
+
         (optionals (appName != "nvim" && appName != null && appName != "") [
           "--set" "NVIM_APPNAME" appName
         ])
@@ -80,8 +64,6 @@ with lib;
     
     wrapperArgs = lib.escapeShellArgs (builtins.concatLists wrapperArgsList);
 
-    # This uses the ignoreConfigRegexes list to filter
-    # the nvim directory
     nvimRtpSrc = let
       src = ../nvim;
     in
@@ -149,7 +131,6 @@ with lib;
         '')
         devPlugins
       )
-      # Append nvim and after directories to the runtimepath
       + ''
         vim.opt.rtp:append('${nvimRtp}/nvim')
         vim.opt.rtp:append('${nvimRtp}/after')
